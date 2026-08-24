@@ -67,7 +67,7 @@ export async function createBearing(container, opts = {}) {
 
   scene.add(new THREE.AmbientLight(0x9ab4c8, 0.5));
   const key = new THREE.DirectionalLight(0xffffff, 2.4); key.position.set(5, 6, 8); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xEF4A23, 1.1); rim.position.set(-6, -3, -4); scene.add(rim);
+  const rim = new THREE.DirectionalLight(0xC30001, 1.1); rim.position.set(-6, -3, -4); scene.add(rim);
 
   const steel = new THREE.MeshStandardMaterial({ color: 0xb8c6d2, metalness: 1, roughness: 0.22 });
   const steelDark = new THREE.MeshStandardMaterial({ color: 0x8FA8BC, metalness: 1, roughness: 0.34 });
@@ -105,11 +105,11 @@ export async function createBearing(container, opts = {}) {
     overlay.appendChild(svg);
     LABELS.forEach(l => {
       const ln = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-      ln.setAttribute('fill', 'none'); ln.setAttribute('stroke', '#EF4A23'); ln.setAttribute('stroke-width', '1.5');
+      ln.setAttribute('fill', 'none'); ln.setAttribute('stroke', '#C30001'); ln.setAttribute('stroke-width', '1.5');
       svg.appendChild(ln); lines[l.key] = ln;
       const el = document.createElement('div');
       el.textContent = l.text;
-      el.style.cssText = "position:absolute;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#fff;white-space:nowrap;transform:translateY(-50%);padding-bottom:6px;border-bottom:1px solid #EF4A23";
+      el.style.cssText = "position:absolute;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#fff;white-space:nowrap;transform:translateY(-50%);padding-bottom:6px;border-bottom:1px solid #C30001";
       overlay.appendChild(el); labelEls[l.key] = el;
     });
     container.appendChild(overlay);

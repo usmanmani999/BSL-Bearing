@@ -66,7 +66,7 @@ function drawSvg(svg) {
 let __chrome = false, __panel = null;
 function progressBar() {
   const bar = document.createElement('div');
-  bar.style.cssText = 'position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:left center;background:#EF4A23;z-index:120;will-change:transform';
+  bar.style.cssText = 'position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:left center;background:#C30001;z-index:120;will-change:transform';
   document.body.appendChild(bar);
   const upd = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight;

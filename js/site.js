@@ -51,7 +51,7 @@ if (form) {
     if (!span) return;
     field.addEventListener('focus', () => {
       span.style.transform = 'translateY(-3px) scale(1.04)';
-      span.style.color = '#EF4A23';
+      span.style.color = '#C30001';
     });
     field.addEventListener('blur', () => {
       if (!field.value) { span.style.transform = 'none'; span.style.color = '#5d7387'; }

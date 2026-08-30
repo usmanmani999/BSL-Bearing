@@ -11,6 +11,25 @@ const LABELS = [
   { key: 'inner', text: 'Inner race', side: 'left' },
 ];
 
+/* Resolve Three.js once and cache it. Returns null when the CDN is blocked,
+   offline or otherwise unreachable, which lets callers keep the static
+   fallback markup instead of pinning a section around an empty canvas. */
+let _three = null;
+export async function ensureThree() {
+  if (_three) return _three;
+  try {
+    const c = document.createElement('canvas');
+    if (!(c.getContext('webgl2') || c.getContext('webgl'))) return null;
+  } catch (e) { return null; }
+  try {
+    const [THREE, roomMod] = await Promise.all([import(THREE_URL), import(ROOM_URL)]);
+    _three = { THREE, roomMod };
+    return _three;
+  } catch (e) {
+    return null;
+  }
+}
+
 function cssFallback(container) {
   container.style.perspective = '1000px';
   const stage = document.createElement('div');
@@ -30,26 +49,16 @@ function cssFallback(container) {
     stage.appendChild(b);
   }
   container.appendChild(stage);
-  return { setProgress() {}, dispose() {} };
+  return { setProgress() {}, dispose() {}, fallback: true };
 }
 
 export async function createBearing(container, opts = {}) {
   const scrub = !!opts.scrub;
   container.style.position = container.style.position || 'relative';
 
-  let gl = null;
-  try {
-    const c = document.createElement('canvas');
-    gl = c.getContext('webgl2') || c.getContext('webgl');
-  } catch (e) { gl = null; }
-  if (!gl) return cssFallback(container);
-
-  let THREE, roomMod;
-  try {
-    [THREE, roomMod] = await Promise.all([import(THREE_URL), import(ROOM_URL)]);
-  } catch (e) {
-    return cssFallback(container); // offline / CDN blocked
-  }
+  const loaded = await ensureThree();
+  if (!loaded) return cssFallback(container); // no WebGL, offline or CDN blocked
+  const { THREE, roomMod } = loaded;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
@@ -205,6 +214,7 @@ export async function createBearing(container, opts = {}) {
   raf = requestAnimationFrame(frame);
 
   return {
+    fallback: false,
     setProgress(p) { target = Math.max(0, Math.min(1, p)); },
     dispose() { cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); },
   };

@@ -266,3 +266,147 @@ img, svg { max-width: 100%; }
   font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .1em;
   text-transform: uppercase; color: #5d7387; line-height: 1.7;
 }
+
+/* ---------- exploded view (3D) ----------
+   Default state is a static diagram in normal document flow: no pinned
+   section, no scroll hijack, and the heading, copy and part labels are always
+   readable. js/site.js adds .is-3d only once Three.js has actually loaded on a
+   pointer-driven, non-reduced-motion viewport, which layers the scroll-scrub
+   WebGL version over the same markup. */
+.scrub3d {
+  position: relative;
+  background: linear-gradient(180deg, #0c2137 0%, #12304F 50%, #0c2137 100%);
+}
+.scrub3d-stage { padding: 64px 0 72px; }
+.scrub3d-eyebrow-inner {
+  display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;
+}
+.scrub3d-kicker,
+.scrub3d-caption {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .2em; text-transform: uppercase;
+}
+.scrub3d-kicker { color: #C30001; }
+.scrub3d-caption { color: #8FA8BC; letter-spacing: .16em; }
+.scrub3d-canvas { display: none; }
+.scrub3d-static { margin: 26px auto 0; padding: 0 32px; max-width: 620px; }
+.scrub3d-static svg { display: block; width: 100%; height: auto; }
+.scrub3d-copy { margin-top: 34px; }
+.scrub3d-parts {
+  list-style: none; margin: 24px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 10px 12px;
+}
+.scrub3d-parts li {
+  border: 1px solid rgba(232,244,251,.28); padding: 9px 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  letter-spacing: .12em; text-transform: uppercase; color: #E8F4FB;
+}
+
+/* enhanced: pinned scroll-scrub, desktop + WebGL only */
+.scrub3d.is-3d { height: 340vh; }
+.scrub3d.is-3d .scrub3d-stage {
+  position: sticky; top: 0; height: 100vh; overflow: hidden; padding: 0;
+}
+.scrub3d.is-3d .scrub3d-canvas { display: block; position: absolute; inset: 0; }
+.scrub3d.is-3d .scrub3d-static { display: none; }
+/* clear of the sticky site header, which otherwise covers this row */
+.scrub3d.is-3d .scrub3d-eyebrow { position: absolute; top: 98px; left: 0; width: 100%; }
+.scrub3d.is-3d .scrub3d-copy { position: absolute; bottom: 36px; left: 0; width: 100%; margin: 0; }
+.scrub3d.is-3d .scrub3d-parts { margin-top: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scrub3d.is-3d { height: auto; }
+  .scrub3d.is-3d .scrub3d-stage { position: static; height: auto; padding: 64px 0 72px; }
+  .scrub3d.is-3d .scrub3d-canvas { display: none; }
+  .scrub3d.is-3d .scrub3d-static { display: block; }
+  .scrub3d.is-3d .scrub3d-eyebrow,
+  .scrub3d.is-3d .scrub3d-copy { position: static; margin-top: 34px; }
+}
+
+/* ---------- mobile ergonomics ----------
+   Scoped to small viewports only: the desktop nav, type scale and spacing are
+   unchanged. Raises navigation text off 12px, gives every nav item, footer
+   link and form control a 44px touch target, and lifts form inputs to 16px so
+   iOS does not auto-zoom the page on focus. */
+@media (max-width: 767px) {
+  .site-nav-inner { padding-left: 20px; padding-right: 20px; gap: 12px; }
+  .nav-links { gap: 4px 14px; }
+  .nav-link {
+    font-size: 14px;
+    min-height: 44px;
+    display: inline-flex; align-items: center;
+    padding-bottom: 0;
+  }
+  .nav-link.is-active { border-bottom-width: 2px; }
+  .brand { min-height: 44px; }
+  .btn-quote { min-height: 44px; display: inline-flex; align-items: center; font-size: 13px; }
+
+  .footer-links { gap: 2px; }
+  .footer-link { min-height: 44px; display: flex; align-items: center; }
+  .footer-grid { padding-left: 20px; padding-right: 20px; }
+  .footer-bottom { padding-left: 20px; padding-right: 20px; }
+
+  /* 16px minimum stops iOS zooming the viewport when a field takes focus */
+  .field, .cat-field input, .cat-field select {
+    font-size: 16px !important;
+    min-height: 48px;
+    width: 100%;
+  }
+  textarea.field { min-height: 120px; }
+  .cat-controls { grid-template-columns: 1fr; }
+
+  /* single column below 640px for the card grids */
+  .office-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 639px) {
+  .fitment-note { font-size: 14px; }
+}
+
+/* respect notched devices in landscape */
+@supports (padding: max(0px)) {
+  @media (max-width: 900px) and (orientation: landscape) {
+    .wrap, .site-nav-inner, .footer-grid, .footer-bottom {
+      padding-left: max(20px, env(safe-area-inset-left));
+      padding-right: max(20px, env(safe-area-inset-right));
+    }
+  }
+}
+
+/* reduced motion: never hide content, just stop it moving */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+  [data-split] span { opacity: 1 !important; transform: none !important; }
+  * { transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- mobile: touch targets and minimum type ----------
+   Mobile-scoped only. The micro-type in this design is mostly set inline on
+   the elements themselves, so the inline sizes are lifted here by attribute
+   selector; desktop keeps the original 11/12/13px scale untouched. */
+@media (max-width: 767px) {
+  .text-link,
+  .cat-more button,
+  .series-toggle {
+    min-height: 44px;
+    display: inline-flex; align-items: center;
+  }
+  .text-link { font-size: 14px; }
+  .nav-link { padding-left: 2px; padding-right: 2px; min-width: 44px; justify-content: center; }
+  .btn-quote, .btn-primary, .btn-outline { font-size: 14px; min-height: 44px; }
+  .btn-primary, .btn-outline { display: inline-flex; align-items: center; }
+
+  .fitment-label, .footer-col-title, .cat-count,
+  .scrub3d-kicker, .scrub3d-caption, .series-meta,
+  .scrub3d-parts li, .series-chip,
+  .footer-bottom, .fitment-chip, .office-contact a,
+  .cat-field > span { font-size: 14px; }
+  /* specificity must match the .cat-kv > div > dt rule set above */
+  .cat-kv > div > dt, .cat-kv > div > dd,
+  .cat-card-inter > div > dt, .cat-card-inter > div > dd { font-size: 14px; }
+
+  /* inline-styled micro-type (kickers, card meta, table cells, addresses) */
+  [style*="font-size:11px"],
+  [style*="font-size:12px"],
+  [style*="font-size:13px"] { font-size: 14px !important; }
+}

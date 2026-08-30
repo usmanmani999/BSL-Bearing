@@ -14,34 +14,67 @@ if (seriesHost || catalogueHosts.length) {
   }).catch(() => {});
 }
 
-function init3d() {
+/* The scroll-scrub exploded view is an enhancement, never a gate. The section
+   renders as a static diagram until we have confirmed all of: a pointer-driven
+   viewport, no reduced-motion preference, WebGL, and Three.js actually
+   downloaded. Only then do we pin the section (.is-3d) and hand it the canvas.
+   Anything short of that leaves the static markup in place, so the heading,
+   copy and part labels are always readable. */
+const scrubEligible = () =>
+  !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+  window.matchMedia('(min-width: 821px)').matches &&
+  window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+async function init3d() {
   const hero = document.querySelector('[data-hero3d]');
   const scrubSection = document.querySelector('[data-scrub3d]');
   if (!hero && !scrubSection) return;
 
-  import('./bearing3d.js').then(mod => {
-    if (hero && !hero.dataset.init) {
-      hero.dataset.init = '1';
-      mod.createBearing(hero, { scrub: false });
-    }
+  let mod;
+  try {
+    mod = await import('./bearing3d.js');
+  } catch (e) {
+    return; // static markup stands
+  }
 
-    if (!scrubSection) return;
-    const host = scrubSection.querySelector('[data-scrub-canvas]');
-    if (!host || host.dataset.init) return;
-    host.dataset.init = '1';
-    const caption = scrubSection.querySelector('[data-scrub-caption]');
-    let api = null;
-    const update = () => {
-      const span = scrubSection.offsetHeight - window.innerHeight;
-      const p = span > 0 ? Math.max(0, Math.min(1, -scrubSection.getBoundingClientRect().top / span)) : 0;
-      if (api) api.setProgress(p);
-      if (caption) caption.textContent = p < .25 ? 'Rotating to three-quarter view'
-        : p < .6 ? 'Parts separating — outer race, balls, cage, inner race'
-        : 'Reassembling';
-    };
-    mod.createBearing(host, { scrub: true }).then(a => { api = a; update(); });
-    addEventListener('scroll', update, { passive: true });
-  }).catch(() => {});
+  if (hero && !hero.dataset.init) {
+    hero.dataset.init = '1';
+    mod.createBearing(hero, { scrub: false }).catch(() => {});
+  }
+
+  if (!scrubSection || !scrubEligible()) return;
+  const host = scrubSection.querySelector('[data-scrub-canvas]');
+  if (!host || host.dataset.init) return;
+
+  // don't pin the section until Three.js is actually in hand
+  if (!(await mod.ensureThree())) return;
+  host.dataset.init = '1';
+  scrubSection.classList.add('is-3d');
+
+  const caption = scrubSection.querySelector('[data-scrub-caption]');
+  const defaultCaption = caption ? caption.textContent : '';
+  let api = null;
+  const update = () => {
+    const span = scrubSection.offsetHeight - window.innerHeight;
+    const p = span > 0 ? Math.max(0, Math.min(1, -scrubSection.getBoundingClientRect().top / span)) : 0;
+    if (api) api.setProgress(p);
+    if (caption) caption.textContent = p < .25 ? 'Scroll to disassemble'
+      : p < .6 ? 'Parts separating — outer race, balls, cage, inner race'
+      : 'Reassembling';
+  };
+
+  const api0 = await mod.createBearing(host, { scrub: true }).catch(() => null);
+  if (!api0 || api0.fallback) {
+    // WebGL went away between the probe and setup - unpin and stay static
+    scrubSection.classList.remove('is-3d');
+    host.replaceChildren();
+    delete host.dataset.init;
+    if (caption) caption.textContent = defaultCaption;
+    return;
+  }
+  api = api0;
+  update();
+  addEventListener('scroll', update, { passive: true });
 }
 
 init3d();
@@ -57,33 +90,46 @@ const FORM_ENDPOINT = '';
 const form = document.querySelector('[data-contact-form]');
 if (form) {
   const formState = document.querySelector('[data-form-state="form"]');
-  const sentState = document.querySelector('[data-form-state="sent"]');
   const unconfigured = document.querySelector('[data-form-state="unconfigured"]');
 
   if (!FORM_ENDPOINT) {
-    console.error(
+    console.warn(
       '[BSL] Contact form has no FORM_ENDPOINT configured in js/site.js — ' +
       'submissions are NOT being delivered anywhere.');
   }
 
+  // There is deliberately no success panel in the markup. Until a real handler
+  // exists, the only outcome is the honest "not connected" panel; a success
+  // message can therefore never be shown for a message that was not sent.
+  const showNotConnected = () => {
+    if (formState) formState.style.display = 'none';
+    if (unconfigured) unconfigured.style.display = '';
+  };
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    if (!FORM_ENDPOINT) {
-      if (formState) formState.style.display = 'none';
-      if (unconfigured) unconfigured.style.display = '';
-      return;
-    }
+    if (!FORM_ENDPOINT) return showNotConnected();
     try {
       const res = await fetch(FORM_ENDPOINT, {
         method: 'POST',
         body: new FormData(form),
       });
       if (!res.ok) throw new Error(res.status);
-      if (formState) formState.style.display = 'none';
-      if (sentState) sentState.style.display = '';
+      // Built here rather than sitting in the markup, so a confirmation can
+      // only ever exist after a real 200 from a real handler.
+      const ok = document.createElement('div');
+      ok.style.padding = '40px 0';
+      ok.innerHTML =
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:12px;' +
+        'letter-spacing:.2em;text-transform:uppercase;color:#C30001">Inquiry received</div>' +
+        '<div style="margin-top:18px;font-family:\'Big Shoulders Display\',sans-serif;' +
+        'font-weight:700;font-size:38px;line-height:1.05;text-transform:uppercase;' +
+        'color:#12304F">Thank you — we\'ll be in touch</div>' +
+        '<p style="margin:16px 0 0;color:#2B2B2B;font-size:15px;line-height:1.8">' +
+        'Your inquiry has reached our sales team. We typically reply within one business day.</p>';
+      form.replaceWith(ok);
     } catch (err) {
-      if (formState) formState.style.display = 'none';
-      if (unconfigured) unconfigured.style.display = '';
+      showNotConnected();
     }
   });
 

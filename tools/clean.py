@@ -102,6 +102,18 @@ def process(rows, kind):
         if rec.get("d") and rec.get("D") and rec["d"] >= rec["D"]:
             reasons.append(f"bore d={rec['d']} is not smaller than outer D={rec['D']}")
 
+        # A DAC designation encodes the bore in its leading digits
+        # (DAC30600337 -> d=30). A mismatch means OCR dropped or added a digit.
+        if kind == "hub" and rec.get("d"):
+            lead = re.match(r"^DAC(\d+)", desig, re.I)
+            # a fractional bore may be floored or rounded in the designation
+            # (d=37.99 is printed as DAC3871..., d=25.4 as DAC254...)
+            allowed = {str(int(rec["d"])), str(round(rec["d"]))}
+            if lead and not any(lead.group(1).startswith(a) for a in allowed):
+                reasons.append(
+                    f"designation {desig!r} does not begin with its bore "
+                    f"({rec['d']}) - a digit is likely mis-read")
+
         if kind == "hub":
             for c in INTERCHANGE:
                 val = scrub(r.get(c, ""))

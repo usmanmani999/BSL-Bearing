@@ -112,3 +112,157 @@ img, svg { max-width: 100%; }
 }
 
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+/* ---------- vehicle fitments ---------- */
+.fitment-group + .fitment-group { margin-top: 34px; }
+.fitment-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .18em;
+  text-transform: uppercase; color: #C30001; margin-bottom: 16px;
+}
+.fitment-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 480px) { .fitment-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .fitment-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .fitment-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.fitment-chip {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 56px; padding: 14px 10px;
+  border: 1px solid rgba(18,48,79,.28); background: #fff;
+  font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: .04em;
+  text-transform: uppercase; color: #12304F; line-height: 1.25;
+  transition: border-color .3s ease, color .3s ease;
+}
+.fitment-chip:hover { border-color: #C30001; color: #C30001; }
+.fitment-note {
+  margin: 32px 0 0; max-width: 780px;
+  font-size: 14px; line-height: 1.7; color: #5d7387;
+}
+
+/* ---------- catalogue ---------- */
+.cat-controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px; margin-bottom: 28px; align-items: end;
+}
+.cat-field { display: flex; flex-direction: column; gap: 10px; }
+.cat-field > span {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .18em;
+  text-transform: uppercase; color: #5d7387;
+}
+.cat-field input, .cat-field select {
+  background: #fff; border: 1px solid rgba(18,48,79,.28); color: #2B2B2B;
+  font-size: 15px; padding: 14px 16px; min-height: 48px; transition: border-color .3s ease;
+}
+.cat-field input:focus, .cat-field select:focus { border-color: #C30001; outline: none; }
+.cat-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .16em;
+  text-transform: uppercase; color: #5d7387; margin-bottom: 14px;
+}
+.cat-scroll { overflow-x: auto; }
+.cat-table { width: 100%; border-collapse: collapse; min-width: 780px; }
+.cat-table th, .cat-table td {
+  padding: 14px 12px; text-align: left; border-bottom: 1px solid rgba(18,48,79,.14);
+  font-size: 14px; color: #2B2B2B; white-space: nowrap;
+}
+.cat-table thead th {
+  position: sticky; top: 0; z-index: 2; background: #12304F; color: #fff;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; font-weight: 500; border-bottom: none;
+}
+.cat-table th[data-sort] { cursor: pointer; user-select: none; }
+.cat-table th[data-sort]:hover { color: #E8F4FB; }
+.cat-table th[data-sort]::after { content: ' ⇅'; opacity: .45; }
+.cat-table th[data-sort][aria-sort="ascending"]::after { content: ' ↑'; opacity: 1; }
+.cat-table th[data-sort][aria-sort="descending"]::after { content: ' ↓'; opacity: 1; }
+.cat-table th[data-sort]:focus-visible { outline: 2px solid #C30001; outline-offset: -2px; }
+.cat-table tbody tr:hover { background: #E8F4FB; }
+.cat-desig {
+  font-family: 'Big Shoulders Display', sans-serif; font-weight: 700;
+  font-size: 22px; letter-spacing: .02em; color: #12304F;
+}
+.cat-inter { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #5d7387; }
+.cat-empty { padding: 40px 0; color: #5d7387; font-size: 15px; }
+.cat-more { margin-top: 26px; }
+
+/* catalogue rows become stacked cards on small screens */
+.cat-cards { display: none; }
+@media (max-width: 767px) {
+  .cat-scroll { display: none; }
+  .cat-cards { display: grid; gap: 14px; }
+  .cat-card { border: 1px solid rgba(18,48,79,.16); background: #fff; padding: 20px 18px; }
+  .cat-card-head {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 700; font-size: 26px;
+    line-height: 1.05; text-transform: uppercase; color: #12304F;
+    padding-bottom: 12px; border-bottom: 1px solid rgba(18,48,79,.14);
+  }
+  .cat-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 12px; margin-top: 14px; }
+  .cat-kv > div > dt,
+  .cat-card-inter > div > dt {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: #5d7387;
+  }
+  .cat-kv > div > dd,
+  .cat-card-inter > div > dd { margin: 5px 0 0; font-size: 15px; color: #2B2B2B; }
+  .cat-card-inter {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(18,48,79,.14);
+    /* interchange codes are long and unbreakable, so let this collapse to
+       fewer columns rather than forcing three narrow ones */
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 12px;
+  }
+  .cat-card-inter > div > dd { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  /* grid children must be allowed to shrink below their content width */
+  .cat-kv > div, .cat-card-inter > div { min-width: 0; }
+  .cat-kv dd, .cat-card-inter dd { overflow-wrap: anywhere; }
+}
+
+/* ---------- deep groove series groups ---------- */
+.series-group { border: 1px solid rgba(18,48,79,.16); background: #fff; margin-bottom: 14px; }
+.series-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 20px 22px; min-height: 64px; background: none; border: none;
+  cursor: pointer; text-align: left; font: inherit; transition: background-color .3s ease;
+}
+.series-toggle:hover { background: #E8F4FB; }
+.series-toggle:focus-visible { outline: 2px solid #C30001; outline-offset: -2px; }
+.series-name {
+  font-family: 'Big Shoulders Display', sans-serif; font-weight: 700; font-size: 26px;
+  letter-spacing: .02em; color: #12304F; line-height: 1;
+}
+.series-meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .12em;
+  text-transform: uppercase; color: #5d7387;
+}
+.series-sign { color: #C30001; font-family: 'JetBrains Mono', monospace; font-size: 18px; flex: none; }
+.series-body { padding: 0 22px 24px; }
+.series-chips {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px;
+}
+.series-chip {
+  padding: 11px 8px; text-align: center; border: 1px solid rgba(18,48,79,.2);
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #12304F;
+}
+.series-closures {
+  margin: 18px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase; color: #5d7387;
+}
+
+/* ---------- contact office cards ---------- */
+.office-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px; align-items: stretch; perspective: 1200px;
+}
+.office-card { display: flex; flex-direction: column; }
+.office-contact {
+  margin-top: auto; padding-top: 18px;
+  border-top: 1px solid rgba(18,48,79,.18);
+  display: flex; flex-direction: column;
+}
+.office-contact a {
+  display: flex; align-items: center; min-height: 44px;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  color: #12304F; word-break: break-word; transition: color .25s ease;
+}
+.office-contact a:hover { color: #C30001; }
+.office-todo {
+  margin-top: auto; padding-top: 18px; border-top: 1px solid rgba(18,48,79,.18);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: #5d7387; line-height: 1.7;
+}

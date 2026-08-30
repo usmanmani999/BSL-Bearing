@@ -34,12 +34,24 @@ function splitWords(el) {
   }));
 }
 
+/* Counters render their real value in the markup, so if this script never runs
+   the page still shows the right number instead of a frozen 0. We only reset
+   them to 0 once we know we are about to animate. */
+function armCounters(counters) {
+  counters.forEach(el => {
+    if (isNaN(parseFloat(el.getAttribute('data-count')))) return;
+    el.dataset.armed = '1';
+    el.textContent = '0';
+  });
+}
+
 function countUp(el) {
   const raw = el.getAttribute('data-count');
   const target = parseFloat(raw);
   const suffix = el.getAttribute('data-suffix') || '';
-  if (isNaN(target)) return;
-  if (reduced()) { el.textContent = raw + suffix; return; }
+  if (isNaN(target) || el.dataset.counted === '1') return;
+  el.dataset.counted = '1';
+  if (reduced() || el.dataset.armed !== '1') { el.textContent = raw + suffix; return; }
   const dur = 1400, t0 = performance.now();
   const step = t => {
     const p = Math.min(1, (t - t0) / dur);
@@ -96,6 +108,15 @@ function pageTransition() {
   __panel = panel;
   panel.style.cssText = 'position:fixed;inset:0;background:#12304F;z-index:200;transform:translateX(-100%);will-change:transform;pointer-events:none';
   document.body.appendChild(panel);
+  // Once the wipe has swept off to the right, park it back off-screen left.
+  // Left at translateX(100%) it sits a full viewport to the right of the page
+  // and adds a phantom horizontal scrollbar on narrow screens.
+  panel.addEventListener('transitionend', e => {
+    if (e.propertyName !== 'transform') return;
+    if (panel.style.transform !== 'translateX(100%)') return;
+    panel.style.transition = 'none';
+    panel.style.transform = 'translateX(-100%)';
+  });
   if (!reduced()) {
     panel.style.transform = 'translateX(0)';
     requestAnimationFrame(() => {
@@ -207,6 +228,7 @@ export function initMotion() {
     return;
   }
 
+  armCounters(counters);
   heads.forEach(h => splitWords(h));
 
   // stagger indices
@@ -248,7 +270,9 @@ export function initMotion() {
   const io2 = new IntersectionObserver(entries => {
     entries.forEach(en => { if (en.isIntersecting) { countUp(en.target); io2.unobserve(en.target); } });
   }, { rootMargin: '0px 0px -10% 0px', threshold: 0.01 });
-  counters.filter(c => !c.closest('[data-reveal]')).forEach(c => io2.observe(c));
+  // every counter gets its own observer, so a counter never depends on the
+  // reveal of an ancestor firing first. countUp is idempotent.
+  counters.forEach(c => io2.observe(c));
 
   tiltCards();
   timelines();
@@ -257,11 +281,18 @@ export function initMotion() {
 
   // safety net: only for elements already inside the viewport that somehow
   // never received an intersection callback — never for off-screen content.
-  setTimeout(() => nodes.forEach(n => {
-    if (n.dataset.revealed === '1') return;
-    const r = n.getBoundingClientRect();
-    if (r.top < window.innerHeight && r.bottom > 0) { trigger(n); io.unobserve(n); }
-  }), 4000);
+  setTimeout(() => {
+    nodes.forEach(n => {
+      if (n.dataset.revealed === '1') return;
+      const r = n.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) { trigger(n); io.unobserve(n); }
+    });
+    // never leave an armed counter sitting at 0 because a callback was missed
+    counters.forEach(c => {
+      if (c.dataset.counted === '1') return;
+      if (c.getBoundingClientRect().top < window.innerHeight) countUp(c);
+    });
+  }, 4000);
 }
 
 export function sweep(after) {

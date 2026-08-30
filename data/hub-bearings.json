@@ -221,17 +221,6 @@
    "koyo": null
   },
   {
-   "designation": "DAC00034/34",
-   "d": 30.0,
-   "D": 60.0,
-   "B": 37.0,
-   "C": 34.0,
-   "weight": 0.4,
-   "skf": "30BVV06",
-   "fag": null,
-   "koyo": null
-  },
-  {
    "designation": "DAC30500020",
    "d": 30.0,
    "D": 50.0,
@@ -437,17 +426,6 @@
    "C": 37.0,
    "weight": 0.48,
    "skf": "32BWD05",
-   "fag": null,
-   "koyo": null
-  },
-  {
-   "designation": "DAC30720045",
-   "d": 32.0,
-   "D": 72.0,
-   "B": 45.0,
-   "C": 45.0,
-   "weight": 0.6,
-   "skf": null,
    "fag": null,
    "koyo": null
   },
@@ -2291,6 +2269,36 @@
  ],
  "flagged": [
   {
+   "designation": "DAC00034/34",
+   "_src": "p1:1780",
+   "d": 30.0,
+   "D": 60.0,
+   "B": 37.0,
+   "C": 34.0,
+   "weight": 0.4,
+   "skf": "30BVV06",
+   "fag": null,
+   "koyo": null,
+   "flags": [
+    "designation 'DAC00034/34' does not begin with its bore (30.0) - a digit is likely mis-read"
+   ]
+  },
+  {
+   "designation": "DAC30720045",
+   "_src": "p1:1780",
+   "d": 32.0,
+   "D": 72.0,
+   "B": 45.0,
+   "C": 45.0,
+   "weight": 0.6,
+   "skf": null,
+   "fag": null,
+   "koyo": null,
+   "flags": [
+    "designation 'DAC30720045' does not begin with its bore (32.0) - a digit is likely mis-read"
+   ]
+  },
+  {
    "designation": "DAC35620040",
    "_src": "p2:230",
    "d": 35.0,
@@ -2333,7 +2341,8 @@
    "fag": "5674478",
    "koyo": null,
    "flags": [
-    "bore d=3941.0 is not smaller than outer D=75.0"
+    "bore d=3941.0 is not smaller than outer D=75.0",
+    "designation 'DAC39/41750037' does not begin with its bore (3941.0) - a digit is likely mis-read"
    ]
   },
   {

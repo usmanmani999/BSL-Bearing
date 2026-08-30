@@ -2,6 +2,18 @@ import * as motion from './motion.js';
 
 motion.initMotion();
 
+/* ---------- parts catalogue ---------- */
+const seriesHost = document.querySelector('[data-series]');
+const catalogueHosts = document.querySelectorAll('[data-catalogue]');
+if (seriesHost || catalogueHosts.length) {
+  import('./catalogue.js').then(m => {
+    if (seriesHost) {
+      m.renderSeries(seriesHost, m.deepGrooveGroups(seriesHost.dataset.closures || ''));
+    }
+    catalogueHosts.forEach(h => m.mountCatalogue(h));
+  }).catch(() => {});
+}
+
 function init3d() {
   const hero = document.querySelector('[data-hero3d]');
   const scrubSection = document.querySelector('[data-scrub3d]');
@@ -34,15 +46,45 @@ function init3d() {
 
 init3d();
 
-/* ---------- contact form ---------- */
+/* ---------- contact form ----------
+   TODO (LAUNCH BLOCKER): FORM_ENDPOINT is empty, so this form does not submit
+   anywhere. While it is empty, submitting shows the "not connected" panel and
+   points the visitor at the sales inbox — it must never show a success message
+   it cannot honour, or real enquiries are lost silently.
+   Set this to a real form handler URL (accepting a POST) to go live. */
+const FORM_ENDPOINT = '';
+
 const form = document.querySelector('[data-contact-form]');
 if (form) {
   const formState = document.querySelector('[data-form-state="form"]');
   const sentState = document.querySelector('[data-form-state="sent"]');
-  form.addEventListener('submit', e => {
+  const unconfigured = document.querySelector('[data-form-state="unconfigured"]');
+
+  if (!FORM_ENDPOINT) {
+    console.error(
+      '[BSL] Contact form has no FORM_ENDPOINT configured in js/site.js — ' +
+      'submissions are NOT being delivered anywhere.');
+  }
+
+  form.addEventListener('submit', async e => {
     e.preventDefault();
-    if (formState) formState.style.display = 'none';
-    if (sentState) sentState.style.display = '';
+    if (!FORM_ENDPOINT) {
+      if (formState) formState.style.display = 'none';
+      if (unconfigured) unconfigured.style.display = '';
+      return;
+    }
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        body: new FormData(form),
+      });
+      if (!res.ok) throw new Error(res.status);
+      if (formState) formState.style.display = 'none';
+      if (sentState) sentState.style.display = '';
+    } catch (err) {
+      if (formState) formState.style.display = 'none';
+      if (unconfigured) unconfigured.style.display = '';
+    }
   });
 
   form.querySelectorAll('input,select,textarea').forEach(field => {

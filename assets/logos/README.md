@@ -21,23 +21,20 @@ Artwork should have a transparent background and be trimmed to the mark — the
 card draws it into a 52px-tall box, so surrounding whitespace makes it look
 small. Raster files are fine at ~240px on the long edge.
 
-## Currently present — 21 of 25
+## Currently present — all 25
 
-Sourced from the `filippofilip95/car-logos-dataset` collection (trimmed and
-downscaled), except John Deere which comes from Simple Icons and has been set
-to John Deere green rather than left as a black silhouette.
+- 20 raster marks from the `filippofilip95/car-logos-dataset` collection,
+  trimmed of transparent margin and downscaled to 240px on the long edge.
+- Fuso, Massey Ferguson, Belarus and New Holland as SVG from the
+  `detain/svg-logos` collection. Each of those shipped with a white
+  full-canvas rect behind the mark and a viewBox to match, which made the
+  artwork render tiny inside a contain-fitted box; the background rect has
+  been removed and the viewBox tightened to the real artwork bounds.
+- John Deere from Simple Icons, set to John Deere green rather than left as a
+  black silhouette.
 
-## Still needed — 4
-
-| Brand | Why it is missing |
-|---|---|
-| Fuso | Only a Mitsubishi Motors file was available. That is a different company, and its wordmark reads "MITSUBISHI MOTORS", so it was not used. Mitsubishi Fuso artwork is needed. |
-| Massey Ferguson | Not in any reachable collection. |
-| Belarus (MTZ) | Not in any reachable collection. |
-| New Holland | Not in any reachable collection. |
-
-These four show their initials badge, which is a deliberate fallback rather
-than a broken state. Supply the files and they appear on the next manifest run.
+Cards show the logo only. The brand name is carried by the img `alt` and the
+card's `title`, so it is still announced to screen readers and shown on hover.
 
 ## Trademarks
 

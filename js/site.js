@@ -3,10 +3,11 @@ import * as motion from './motion.js';
 motion.initMotion();
 
 /* ---------- vehicle fitment logos ----------
-   Each brand card ships with its initials in the tile. If a logo file has been
-   added at assets/logos/<slug>.svg (or .png) it is swapped in here. Probing
-   with an Image() rather than rendering an <img> directly means a missing file
-   costs nothing visible — no broken-image icon, no layout shift. */
+   Cards are logo-only: the mark is the identifier, with the brand name carried
+   by the img alt text and the card's title attribute. Each card ships with the
+   brand name as text, which the logo replaces once it has decoded. Files live
+   at assets/logos/<slug>.svg|png and are listed in manifest.json, so this costs
+   one request rather than probing two extensions for all 25 brands. */
 const logoCards = document.querySelectorAll('.fitment-chip[data-logo]');
 if (logoCards.length) {
   fetch('assets/logos/manifest.json')
@@ -15,21 +16,20 @@ if (logoCards.length) {
       logoCards.forEach(card => {
         const file = manifest[card.dataset.logo];
         const mark = card.querySelector('.fitment-mark');
-        const name = card.querySelector('.fitment-name');
-        if (!file || !mark) return;   // no logo yet: initials badge stays
+        const name = card.dataset.name || '';
+        if (!file || !mark) return;   // no logo file: the text fallback stays
         const img = new Image();
-        img.alt = '';                 // the brand name sits directly below
+        img.alt = name;               // the only place the brand is named visually
         img.decoding = 'async';
         // handlers before src: a cached image can fire load synchronously.
-        // Only swap once it has decoded, so a bad file leaves the initials
-        // badge in place rather than an empty box. No loading="lazy" here —
-        // the element is detached, and a lazy detached image never loads.
+        // Only swap once it has decoded, so a bad file leaves the brand name
+        // in place rather than an empty card. No loading="lazy" here — the
+        // element is detached, and a lazy detached image never loads.
         img.onload = () => mark.replaceChildren(img);
         img.src = `assets/logos/${file}`;
-        if (name) card.setAttribute('aria-label', name.textContent.trim());
       });
     })
-    .catch(() => {});   // manifest missing: every card keeps its initials
+    .catch(() => {});   // manifest missing: every card keeps its name text
 }
 
 /* ---------- parts catalogue ---------- */

@@ -8,7 +8,8 @@
    once. */
 
 const PAGE_SIZE = 40;
-const DASH = '—';
+// en dash marks an empty interchange cell; not an em dash
+const DASH = '\u2013';
 
 const SCHEMA = {
   /* Headers are uppercased by the site's type styles, so "d" and "D" would

@@ -6,7 +6,7 @@ a brand with no entry keeps its initials badge instead.
 
 ## Adding or replacing a logo
 
-1. Drop the file in here named after the brand's `data-logo` slug —
+1. Drop the file in here named after the brand's `data-logo` slug:
    `toyota.png`, `massey-ferguson.svg`, and so on. SVG is preferred.
 2. Regenerate the manifest:
 
@@ -17,11 +17,11 @@ a brand with no entry keeps its initials badge instead.
        (d / "manifest.json").write_text(json.dumps(m, indent=1, sort_keys=True) + "\n")
        PY
 
-Artwork should have a transparent background and be trimmed to the mark — the
+Artwork should have a transparent background and be trimmed to the mark. The
 card draws it into a 52px-tall box, so surrounding whitespace makes it look
 small. Raster files are fine at ~240px on the long edge.
 
-## Currently present — all 25
+## Currently present: all 25
 
 - 20 raster marks from the `filippofilip95/car-logos-dataset` collection,
   trimmed of transparent margin and downscaled to 240px on the long edge.

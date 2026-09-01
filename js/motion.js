@@ -263,7 +263,7 @@ export function initMotion() {
   parallax();
 
   // safety net: only for elements already inside the viewport that somehow
-  // never received an intersection callback — never for off-screen content.
+  // never received an intersection callback, never for off-screen content.
   setTimeout(() => {
     nodes.forEach(n => {
       if (n.dataset.revealed === '1') return;

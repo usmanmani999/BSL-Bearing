@@ -23,7 +23,7 @@ if (logoCards.length) {
         img.decoding = 'async';
         // handlers before src: a cached image can fire load synchronously.
         // Only swap once it has decoded, so a bad file leaves the brand name
-        // in place rather than an empty card. No loading="lazy" here — the
+        // in place rather than an empty card. No loading="lazy" here, since the
         // element is detached, and a lazy detached image never loads.
         img.onload = () => mark.replaceChildren(img);
         img.src = `assets/logos/${file}`;
@@ -89,7 +89,7 @@ async function init3d() {
     const p = span > 0 ? Math.max(0, Math.min(1, -scrubSection.getBoundingClientRect().top / span)) : 0;
     if (api) api.setProgress(p);
     if (caption) caption.textContent = p < .25 ? 'Scroll to disassemble'
-      : p < .6 ? 'Parts separating — outer race, balls, cage, inner race'
+      : p < .6 ? 'Parts separating: outer race, balls, cage, inner race'
       : 'Reassembling';
   };
 
@@ -112,7 +112,7 @@ init3d();
 /* ---------- contact form ----------
    TODO (LAUNCH BLOCKER): FORM_ENDPOINT is empty, so this form does not submit
    anywhere. While it is empty, submitting shows the "not connected" panel and
-   points the visitor at the sales inbox — it must never show a success message
+   points the visitor at the sales inbox. It must never show a success message
    it cannot honour, or real enquiries are lost silently.
    Set this to a real form handler URL (accepting a POST) to go live. */
 const FORM_ENDPOINT = '';
@@ -124,8 +124,8 @@ if (form) {
 
   if (!FORM_ENDPOINT) {
     console.warn(
-      '[BSL] Contact form has no FORM_ENDPOINT configured in js/site.js — ' +
-      'submissions are NOT being delivered anywhere.');
+      '[BSL] Contact form has no FORM_ENDPOINT configured in js/site.js. ' +
+      'Submissions are NOT being delivered anywhere.');
   }
 
   // There is deliberately no success panel in the markup. Until a real handler
@@ -154,7 +154,7 @@ if (form) {
         'letter-spacing:.2em;text-transform:uppercase;color:#C30001">Inquiry received</div>' +
         '<div style="margin-top:18px;font-family:\'Big Shoulders Display\',sans-serif;' +
         'font-weight:700;font-size:38px;line-height:1.05;text-transform:uppercase;' +
-        'color:#12304F">Thank you — we\'ll be in touch</div>' +
+        'color:#12304F">Thank you, we\'ll be in touch</div>' +
         '<p style="margin:16px 0 0;color:#2B2B2B;font-size:15px;line-height:1.8">' +
         'Your inquiry has reached our sales team. We typically reply within one business day.</p>';
       form.replaceWith(ok);

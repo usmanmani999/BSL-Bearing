@@ -113,6 +113,21 @@ img, svg { max-width: 100%; }
 
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
 
+/* Justified body copy.
+
+   Only for wide single-column prose: hero leads, section intros and the long
+   product explanations, all of which sit on a measure of roughly 520px or
+   more. Card copy, quotes, captions and list text stay ragged right, because
+   justifying a 300px measure opens rivers of white space between the words.
+   Below 768px every column is narrow, so justification is switched off there
+   regardless of which element carries the class. Hyphenation is on to keep
+   the word spacing even; the pages declare lang="en", so the browser has a
+   dictionary to hyphenate with. */
+.justify { text-align: justify; text-justify: inter-word; hyphens: auto; }
+@media (max-width: 767px) {
+  .justify { text-align: left; hyphens: manual; }
+}
+
 /* ---------- vehicle fitments ---------- */
 .fitment-group + .fitment-group { margin-top: 34px; }
 .fitment-label {
@@ -123,7 +138,7 @@ img, svg { max-width: 100%; }
 @media (min-width: 480px) { .fitment-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 768px) { .fitment-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1024px) { .fitment-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
-/* Brand card: the manufacturer logo alone. No name label — the logo is the
+/* Brand card: the manufacturer logo alone. No name label, since the logo is the
    identifier. The brand name lives in the img's alt text and the card's title
    attribute, so screen readers and hover tooltips still name it, and the text
    fallback below shows if a logo file ever fails to load. */

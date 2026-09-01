@@ -123,15 +123,39 @@ img, svg { max-width: 100%; }
 @media (min-width: 480px) { .fitment-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 768px) { .fitment-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1024px) { .fitment-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+/* Brand card: a mark tile above the name. The tile shows the brand's initials
+   until a real logo file is dropped into assets/logos/<slug>.svg|png, at which
+   point js/site.js swaps it in — see assets/logos/README.md. */
 .fitment-chip {
-  display: flex; align-items: center; justify-content: center; text-align: center;
-  min-height: 56px; padding: 14px 10px;
-  border: 1px solid rgba(18,48,79,.28); background: #fff;
-  font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: .04em;
-  text-transform: uppercase; color: #12304F; line-height: 1.25;
-  transition: border-color .3s ease, color .3s ease;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  gap: 12px; text-align: center;
+  min-height: 118px; padding: 18px 12px 16px;
+  border: 1px solid rgba(18,48,79,.18); background: #fff;
+  color: #12304F;
+  transition: border-color .3s ease, color .3s ease, box-shadow .3s ease, transform .3s ease;
 }
-.fitment-chip:hover { border-color: #C30001; color: #C30001; }
+.fitment-chip:hover {
+  border-color: #C30001; color: #C30001;
+  box-shadow: 0 8px 22px rgba(18,48,79,.10);
+  transform: translateY(-2px);
+}
+.fitment-mark {
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; flex: none;
+  border-radius: 50%;
+  background: #E8F4FB; border: 1px solid rgba(18,48,79,.12);
+  font-family: 'Big Shoulders Display', sans-serif; font-weight: 800;
+  font-size: 19px; letter-spacing: .04em; color: #12304F;
+  transition: background-color .3s ease, border-color .3s ease;
+}
+.fitment-chip:hover .fitment-mark { background: #fff; border-color: rgba(195,0,1,.35); }
+/* a real logo fills the tile instead of the initials */
+.fitment-mark.has-logo { background: #fff; border-color: rgba(18,48,79,.10); padding: 7px; }
+.fitment-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.fitment-name {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: .04em;
+  text-transform: uppercase; line-height: 1.3;
+}
 .fitment-note {
   margin: 32px 0 0; max-width: 780px;
   font-size: 14px; line-height: 1.7; color: #5d7387;
@@ -399,7 +423,7 @@ img, svg { max-width: 100%; }
   .fitment-label, .footer-col-title, .cat-count,
   .scrub3d-kicker, .scrub3d-caption, .series-meta,
   .scrub3d-parts li, .series-chip,
-  .footer-bottom, .fitment-chip, .office-contact a,
+  .footer-bottom, .fitment-name, .office-contact a,
   .cat-field > span { font-size: 14px; }
   /* specificity must match the .cat-kv > div > dt rule set above */
   .cat-kv > div > dt, .cat-kv > div > dd,
@@ -409,4 +433,22 @@ img, svg { max-width: 100%; }
   [style*="font-size:11px"],
   [style*="font-size:12px"],
   [style*="font-size:13px"] { font-size: 14px !important; }
+}
+
+/* ---------- horizontal scroll family headings ----------
+   These panels previously shared the 320px card width, so INDUSTRIAL and
+   AUTOMOTIVE were clipped by the track's overflow. They now size to their own
+   text and never wrap. */
+.hscroll-title {
+  flex: none;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-right: 24px;
+}
+.hscroll-title-text {
+  margin-top: 12px;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-style: italic; font-weight: 800;
+  font-size: clamp(40px, 6vw, 80px); line-height: .92;
+  text-transform: uppercase; color: #12304F;
+  white-space: nowrap;
 }

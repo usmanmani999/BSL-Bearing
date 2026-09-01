@@ -2,6 +2,39 @@ import * as motion from './motion.js';
 
 motion.initMotion();
 
+/* ---------- vehicle fitment logos ----------
+   Each brand card ships with its initials in the tile. If a logo file has been
+   added at assets/logos/<slug>.svg (or .png) it is swapped in here. Probing
+   with an Image() rather than rendering an <img> directly means a missing file
+   costs nothing visible — no broken-image icon, no layout shift. */
+const logoCards = document.querySelectorAll('.fitment-chip[data-logo]');
+if (logoCards.length) {
+  const tryLoad = (src) => new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(src);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+
+  logoCards.forEach(async card => {
+    const slug = card.dataset.logo;
+    const mark = card.querySelector('.fitment-mark');
+    const name = card.querySelector('.fitment-name');
+    if (!slug || !mark) return;
+    const src = await tryLoad(`assets/logos/${slug}.svg`)
+             || await tryLoad(`assets/logos/${slug}.png`);
+    if (!src) return;
+    const img = new Image();
+    img.src = src;
+    img.alt = '';           // the brand name sits right below, so this is decorative
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    mark.replaceChildren(img);
+    mark.classList.add('has-logo');
+    if (name) card.setAttribute('aria-label', name.textContent.trim());
+  });
+}
+
 /* ---------- parts catalogue ---------- */
 const seriesHost = document.querySelector('[data-series]');
 const catalogueHosts = document.querySelectorAll('[data-catalogue]');

@@ -75,7 +75,7 @@ function drawSvg(svg) {
 }
 
 /* ---------- chrome ---------- */
-let __chrome = false, __panel = null;
+let __chrome = false;
 function progressBar() {
   const bar = document.createElement('div');
   bar.style.cssText = 'position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:left center;background:#C30001;z-index:120;will-change:transform';
@@ -102,42 +102,25 @@ function stickyNav() {
   upd();
 }
 
+/* Page entry.
+
+   This used to intercept every internal link, slide a full-screen navy panel
+   across, and hold navigation back by 520ms before actually following the
+   href. That is what read as "weird": the click felt unresponsive, the wipe
+   ran again on arrival, and any click during the delay was swallowed.
+
+   Navigation is no longer blocked at all. Links behave natively; the incoming
+   page just settles in with a short fade, which reads as fast rather than
+   staged. */
 function pageTransition() {
-  if (__panel) return;
-  const panel = document.createElement('div');
-  __panel = panel;
-  panel.style.cssText = 'position:fixed;inset:0;background:#12304F;z-index:200;transform:translateX(-100%);will-change:transform;pointer-events:none';
-  document.body.appendChild(panel);
-  // Once the wipe has swept off to the right, park it back off-screen left.
-  // Left at translateX(100%) it sits a full viewport to the right of the page
-  // and adds a phantom horizontal scrollbar on narrow screens.
-  panel.addEventListener('transitionend', e => {
-    if (e.propertyName !== 'transform') return;
-    if (panel.style.transform !== 'translateX(100%)') return;
-    panel.style.transition = 'none';
-    panel.style.transform = 'translateX(-100%)';
-  });
-  if (!reduced()) {
-    panel.style.transform = 'translateX(0)';
-    requestAnimationFrame(() => {
-      panel.style.transition = 'transform .7s ' + EXPO;
-      requestAnimationFrame(() => { panel.style.transform = 'translateX(100%)'; });
-    });
-  }
-  document.addEventListener('click', e => {
-    const a = e.target.closest && e.target.closest('a[href$=".html"]');
-    if (!a || reduced() || e.metaKey || e.ctrlKey) return;
-    const href = a.getAttribute('href') || '';
-    if (/^https?:\/\//i.test(href) || a.target === '_blank') return;
-    e.preventDefault();
-    panel.style.transition = 'none';
-    panel.style.transform = 'translateX(-100%)';
-    requestAnimationFrame(() => {
-      panel.style.transition = 'transform .55s ' + EXPO;
-      panel.style.transform = 'translateX(0)';
-    });
-    setTimeout(() => { location.href = href; }, 520);
-  });
+  if (reduced()) return;
+  const main = document.querySelector('main');
+  if (!main) return;
+  main.style.opacity = '0';
+  main.style.transition = 'opacity .28s ease-out';
+  requestAnimationFrame(() => requestAnimationFrame(() => { main.style.opacity = '1'; }));
+  // never leave content stuck invisible if the transition event is missed
+  setTimeout(() => { main.style.opacity = '1'; }, 600);
 }
 
 /* ---------- pointer-driven card tilt ---------- */
@@ -293,19 +276,4 @@ export function initMotion() {
       if (c.getBoundingClientRect().top < window.innerHeight) countUp(c);
     });
   }, 4000);
-}
-
-export function sweep(after) {
-  if (reduced() || !__panel) { if (after) after(); return; }
-  const p = __panel;
-  p.style.transition = 'none';
-  p.style.transform = 'translateX(-100%)';
-  requestAnimationFrame(() => {
-    p.style.transition = 'transform .45s ' + EXPO;
-    p.style.transform = 'translateX(0)';
-    setTimeout(() => {
-      if (after) after();
-      requestAnimationFrame(() => { p.style.transform = 'translateX(100%)'; });
-    }, 460);
-  });
 }

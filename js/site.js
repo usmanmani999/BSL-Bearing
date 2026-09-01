@@ -9,30 +9,27 @@ motion.initMotion();
    costs nothing visible — no broken-image icon, no layout shift. */
 const logoCards = document.querySelectorAll('.fitment-chip[data-logo]');
 if (logoCards.length) {
-  const tryLoad = (src) => new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => resolve(src);
-    img.onerror = () => resolve(null);
-    img.src = src;
-  });
-
-  logoCards.forEach(async card => {
-    const slug = card.dataset.logo;
-    const mark = card.querySelector('.fitment-mark');
-    const name = card.querySelector('.fitment-name');
-    if (!slug || !mark) return;
-    const src = await tryLoad(`assets/logos/${slug}.svg`)
-             || await tryLoad(`assets/logos/${slug}.png`);
-    if (!src) return;
-    const img = new Image();
-    img.src = src;
-    img.alt = '';           // the brand name sits right below, so this is decorative
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    mark.replaceChildren(img);
-    mark.classList.add('has-logo');
-    if (name) card.setAttribute('aria-label', name.textContent.trim());
-  });
+  fetch('assets/logos/manifest.json')
+    .then(r => (r.ok ? r.json() : {}))
+    .then(manifest => {
+      logoCards.forEach(card => {
+        const file = manifest[card.dataset.logo];
+        const mark = card.querySelector('.fitment-mark');
+        const name = card.querySelector('.fitment-name');
+        if (!file || !mark) return;   // no logo yet: initials badge stays
+        const img = new Image();
+        img.alt = '';                 // the brand name sits directly below
+        img.decoding = 'async';
+        // handlers before src: a cached image can fire load synchronously.
+        // Only swap once it has decoded, so a bad file leaves the initials
+        // badge in place rather than an empty box. No loading="lazy" here —
+        // the element is detached, and a lazy detached image never loads.
+        img.onload = () => mark.replaceChildren(img);
+        img.src = `assets/logos/${file}`;
+        if (name) card.setAttribute('aria-label', name.textContent.trim());
+      });
+    })
+    .catch(() => {});   // manifest missing: every card keeps its initials
 }
 
 /* ---------- parts catalogue ---------- */

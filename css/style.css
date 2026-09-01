@@ -123,39 +123,47 @@ img, svg { max-width: 100%; }
 @media (min-width: 480px) { .fitment-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 768px) { .fitment-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1024px) { .fitment-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
-/* Brand card: a mark tile above the name. The tile shows the brand's initials
-   until a real logo file is dropped into assets/logos/<slug>.svg|png, at which
-   point js/site.js swaps it in — see assets/logos/README.md. */
+/* Brand card: manufacturer logo above the name. The logo area is a wide box,
+   not a circle — many of these marks are wordmarks at 5:1 or wider and a round
+   tile would shrink them to nothing. Brands with no logo file fall back to a
+   circular initials badge of the same height, so rows stay aligned. */
 .fitment-chip {
   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  gap: 12px; text-align: center;
-  min-height: 118px; padding: 18px 12px 16px;
+  gap: 14px; text-align: center;
+  min-height: 122px; padding: 18px 14px 16px;
   border: 1px solid rgba(18,48,79,.18); background: #fff;
   color: #12304F;
   transition: border-color .3s ease, color .3s ease, box-shadow .3s ease, transform .3s ease;
 }
 .fitment-chip:hover {
-  border-color: #C30001; color: #C30001;
+  border-color: #C30001;
   box-shadow: 0 8px 22px rgba(18,48,79,.10);
   transform: translateY(-2px);
 }
 .fitment-mark {
   display: flex; align-items: center; justify-content: center;
-  width: 52px; height: 52px; flex: none;
-  border-radius: 50%;
+  width: 100%; height: 52px; flex: none;
+}
+.fitment-mark img {
+  /* capped below 100% so a 6:1 wordmark does not out-shout a square mark */
+  max-width: 82%; max-height: 100%;
+  width: auto; height: auto; object-fit: contain; display: block;
+}
+/* fallback badge, used only where no logo file exists yet */
+.fitment-initials {
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 50%;
   background: #E8F4FB; border: 1px solid rgba(18,48,79,.12);
   font-family: 'Big Shoulders Display', sans-serif; font-weight: 800;
   font-size: 19px; letter-spacing: .04em; color: #12304F;
   transition: background-color .3s ease, border-color .3s ease;
 }
-.fitment-chip:hover .fitment-mark { background: #fff; border-color: rgba(195,0,1,.35); }
-/* a real logo fills the tile instead of the initials */
-.fitment-mark.has-logo { background: #fff; border-color: rgba(18,48,79,.10); padding: 7px; }
-.fitment-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.fitment-chip:hover .fitment-initials { background: #fff; border-color: rgba(195,0,1,.35); }
 .fitment-name {
   font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: .04em;
-  text-transform: uppercase; line-height: 1.3;
+  text-transform: uppercase; line-height: 1.3; color: #12304F;
 }
+.fitment-chip:hover .fitment-name { color: #C30001; }
 .fitment-note {
   margin: 32px 0 0; max-width: 780px;
   font-size: 14px; line-height: 1.7; color: #5d7387;

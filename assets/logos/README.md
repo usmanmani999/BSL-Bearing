@@ -44,4 +44,5 @@ display them: manufacturers commonly allow this for parts suppliers, but many
 require written permission and forbid recolouring, distortion, or any suggestion
 of endorsement or affiliation.
 
-The disclaimer beneath the grid must stay.
+The trademark disclaimer that previously sat beneath the grid was removed at the
+client's instruction.

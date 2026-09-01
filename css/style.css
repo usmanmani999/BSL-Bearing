@@ -152,10 +152,6 @@ img, svg { max-width: 100%; }
   font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: .04em;
   text-transform: uppercase; color: #12304F; text-align: center; line-height: 1.3;
 }
-.fitment-note {
-  margin: 32px 0 0; max-width: 780px;
-  font-size: 14px; line-height: 1.7; color: #5d7387;
-}
 
 /* ---------- catalogue ---------- */
 .cat-controls {
@@ -380,8 +376,7 @@ img, svg { max-width: 100%; }
 }
 
 @media (max-width: 639px) {
-  .fitment-note { font-size: 14px; }
-}
+  }
 
 /* respect notched devices in landscape */
 @supports (padding: max(0px)) {

@@ -2,6 +2,19 @@ import * as motion from './motion.js';
 
 motion.initMotion();
 
+/* The sticky header overlays the pinned exploded-view stage, and it is one row
+   tall on a desktop but three on a phone, so nothing downstream can hardcode
+   its height. Publish it as a custom property and keep it current: the header
+   also changes height on scroll, when stickyNav() tightens its padding. */
+const nav = document.querySelector('[data-nav]');
+if (nav) {
+  const setNavH = () =>
+    document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');
+  setNavH();
+  if (window.ResizeObserver) new ResizeObserver(setNavH).observe(nav);
+  else addEventListener('resize', setNavH);
+}
+
 /* ---------- vehicle fitment logos ----------
    Cards are logo-only: the mark is the identifier, with the brand name carried
    by the img alt text and the card's title attribute. Each card ships with the
@@ -62,15 +75,20 @@ if (diagram && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 }
 
 /* The scroll-scrub exploded view is an enhancement, never a gate. The section
-   renders as a static diagram until we have confirmed all of: a pointer-driven
-   viewport, no reduced-motion preference, WebGL, and Three.js actually
-   downloaded. Only then do we pin the section (.is-3d) and hand it the canvas.
-   Anything short of that leaves the static markup in place, so the heading,
-   copy and part labels are always readable. */
+   renders as a static diagram until we have confirmed both WebGL and that
+   Three.js actually downloaded. Only then do we pin the section (.is-3d) and
+   hand it the canvas. Anything short of that leaves the static markup in
+   place, so the heading, copy and part labels are always readable.
+
+   This used to require a screen at least 821px wide with a fine pointer, so
+   phones only ever got the static diagram. The section now runs the same
+   animation everywhere; the touch-specific work is in the layout (see the
+   narrow-screen rules for .scrub3d.is-3d) and in bearing3d.js, which sizes
+   the callouts and the render resolution to the viewport. Reduced motion is
+   the one preference still honoured, since a scroll-driven animation is
+   exactly what that setting asks us not to run. */
 const scrubEligible = () =>
-  !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
-  window.matchMedia('(min-width: 821px)').matches &&
-  window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 async function init3d() {
   const hero = document.querySelector('[data-hero3d]');
@@ -100,13 +118,17 @@ async function init3d() {
 
   const caption = scrubSection.querySelector('[data-scrub-caption]');
   const defaultCaption = caption ? caption.textContent : '';
+  // The full caption runs to three lines on a phone, pushing the bearing out
+  // of the stage. Narrow screens get the same status in fewer words.
+  const narrow = () => window.matchMedia('(max-width: 820px)').matches;
   let api = null;
   const update = () => {
     const span = scrubSection.offsetHeight - window.innerHeight;
     const p = span > 0 ? Math.max(0, Math.min(1, -scrubSection.getBoundingClientRect().top / span)) : 0;
     if (api) api.setProgress(p);
     if (caption) caption.textContent = p < .25 ? 'Scroll to disassemble'
-      : p < .6 ? 'Parts separating: outer race, balls, cage, inner race'
+      : p < .6 ? (narrow() ? 'Parts separating'
+                           : 'Parts separating: outer race, balls, cage, inner race')
       : 'Reassembling';
   };
 

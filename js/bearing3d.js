@@ -54,7 +54,12 @@ function cssFallback(container) {
 
 export async function createBearing(container, opts = {}) {
   const scrub = !!opts.scrub;
-  container.style.position = container.style.position || 'relative';
+  /* The callout overlay is positioned against this element, so it has to be a
+     containing block. Only promote it when it is genuinely static: writing an
+     inline position unconditionally would beat the stylesheet, and the pinned
+     scrub stage positions this host absolutely to fill the viewport. Losing
+     that left the canvas at its default 2:1 aspect instead of full-bleed. */
+  if (getComputedStyle(container).position === 'static') container.style.position = 'relative';
 
   const loaded = await ensureThree();
   if (!loaded) return cssFallback(container); // no WebGL, offline or CDN blocked
@@ -65,7 +70,9 @@ export async function createBearing(container, opts = {}) {
   camera.position.set(0, 0, scrub ? 15 : 16);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  // A phone runs both bearings on the home page and often reports a ratio of 3.
+  // Capping lower there keeps the pixel count sane without a visible drop.
+  renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile() ? 1.75 : 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
   renderer.domElement.style.cssText = 'display:block;width:100%;height:100%';
@@ -117,22 +124,48 @@ export async function createBearing(container, opts = {}) {
       ln.setAttribute('fill', 'none'); ln.setAttribute('stroke', '#C30001'); ln.setAttribute('stroke-width', '1.5');
       svg.appendChild(ln); lines[l.key] = ln;
       const el = document.createElement('div');
+      el.className = 'scrub3d-callout';   // styled in css/style.css, incl. narrow screens
       el.textContent = l.text;
-      el.style.cssText = "position:absolute;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#fff;white-space:nowrap;transform:translateY(-50%);padding-bottom:6px;border-bottom:1px solid #C30001";
       overlay.appendChild(el); labelEls[l.key] = el;
     });
     container.appendChild(overlay);
   }
 
+  /* Radius the exploded assembly needs in view, in world units: the ball ring
+     at full separation plus a margin. Chosen so a landscape viewport still
+     resolves to the original distance of 15 and desktop framing is unchanged. */
+  const FIT = 4.7;
+
   function resize() {
     const w = container.clientWidth || 1, h = container.clientHeight || 1;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    camera.fov = w < 700 ? 46 : 35;
+    // The hero keeps its width-based field of view. The scrub holds one field
+    // of view everywhere and moves the camera instead, so the bearing has the
+    // same perspective on a phone as on a desktop rather than a wider, more
+    // distorted one.
+    camera.fov = scrub ? 35 : (w < 700 ? 46 : 35);
     camera.updateProjectionMatrix();
+    if (scrub) {
+      /* Frame against whichever axis is tighter. A phone hands this canvas a
+         roughly square band and a desktop hands it a wide one; fitting the
+         narrow axis keeps the bearing whole on both instead of cropping it
+         where there is no room. */
+      const t = Math.tan(camera.fov * Math.PI / 360);
+      camera.position.z = Math.max(15, Math.min(32, FIT / Math.min(t, t * camera.aspect)));
+    }
   }
   resize();
   const ro = new ResizeObserver(resize); ro.observe(container);
+
+  /* Each bearing drives its own animation frame loop, and the home page has
+     two. Keep the state updating but skip the draw while the canvas is off
+     screen, which is most of the time on a phone. */
+  let onScreen = true;
+  const vo = new IntersectionObserver(entries => {
+    entries.forEach(en => { onScreen = en.isIntersecting; });
+  }, { rootMargin: '120px' });
+  vo.observe(container);
 
   // pointer tilt
   const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -175,14 +208,27 @@ export async function createBearing(container, opts = {}) {
       overlay.style.opacity = e > 0.12 ? '1' : '0';
       if (e > 0.12) {
         const W = container.clientWidth, H = container.clientHeight;
+        // Leader geometry scales with the canvas. The desktop numbers would
+        // run a label clean off a 375px screen, or leave its leader crossing
+        // the whole bearing.
+        const narrow = W < 560;
+        const edge = narrow ? 8 : 12;    // gap from the canvas edge
+        const tail = narrow ? 52 : 108;  // horizontal run into the label
+        const step = narrow ? 26 : 60;   // how far the leader steps off the part
+        const keep = narrow ? 74 : 130;  // keep the elbow clear of the label
         const map = { outer, inner, cage: cageRing, ball: ballMeshes[1] };
         LABELS.forEach((l, i) => {
           const pt = project(map[l.key]);
           const right = l.side === 'right';
-          const lx = right ? W - 12 : 12;
-          const ly = H * (0.16 + i * 0.22);
-          const mid = right ? Math.min(W - 130, pt.x + 60) : Math.max(130, pt.x - 60);
-          lines[l.key].setAttribute('points', pt.x + ',' + pt.y + ' ' + mid + ',' + ly + ' ' + (right ? lx - 108 : lx + 108) + ',' + ly);
+          const lx = right ? W - edge : edge;
+          // The ladder is kept inside the band between the status caption and
+          // the copy block. It used to run to 0.82 of the height, which sat on
+          // the heading once the canvas correctly filled the pinned stage. A
+          // short canvas, meaning a phone held sideways, compresses it further:
+          // there the copy still overlays the canvas and starts much higher up.
+          const ly = H * (0.15 + i * (H < 480 ? 0.1 : 0.18));
+          const mid = right ? Math.min(W - keep, pt.x + step) : Math.max(keep, pt.x - step);
+          lines[l.key].setAttribute('points', pt.x + ',' + pt.y + ' ' + mid + ',' + ly + ' ' + (right ? lx - tail : lx + tail) + ',' + ly);
           labelEls[l.key].style.left = right ? 'auto' : lx + 'px';
           labelEls[l.key].style.right = right ? (W - lx) + 'px' : 'auto';
           labelEls[l.key].style.top = ly + 'px';
@@ -209,13 +255,13 @@ export async function createBearing(container, opts = {}) {
       group.rotation.y = introY + tilt.y;
       if (!reduced()) group.rotation.z += 0.0022;
     }
-    renderer.render(scene, camera);
+    if (onScreen) renderer.render(scene, camera);
   }
   raf = requestAnimationFrame(frame);
 
   return {
     fallback: false,
     setProgress(p) { target = Math.max(0, Math.min(1, p)); },
-    dispose() { cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); },
+    dispose() { cancelAnimationFrame(raf); ro.disconnect(); vo.disconnect(); renderer.dispose(); },
   };
 }

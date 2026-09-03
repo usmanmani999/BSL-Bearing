@@ -359,17 +359,71 @@ img, svg { max-width: 100%; }
   letter-spacing: .12em; text-transform: uppercase; color: #E8F4FB;
 }
 
-/* enhanced: pinned scroll-scrub, desktop + WebGL only */
+/* enhanced: pinned scroll-scrub, anywhere WebGL is available */
 .scrub3d.is-3d { height: 340vh; }
 .scrub3d.is-3d .scrub3d-stage {
   position: sticky; top: 0; height: 100vh; overflow: hidden; padding: 0;
 }
 .scrub3d.is-3d .scrub3d-canvas { display: block; position: absolute; inset: 0; }
 .scrub3d.is-3d .scrub3d-static { display: none; }
-/* clear of the sticky site header, which otherwise covers this row */
-.scrub3d.is-3d .scrub3d-eyebrow { position: absolute; top: 98px; left: 0; width: 100%; }
+/* clear of the sticky site header, which otherwise covers this row. Its height
+   is published by js/site.js because it is one row on a desktop and three on a
+   phone, so no fixed value is right for both. */
+.scrub3d.is-3d .scrub3d-eyebrow {
+  position: absolute; top: calc(var(--navh, 70px) + 28px); left: 0; width: 100%;
+}
 .scrub3d.is-3d .scrub3d-copy { position: absolute; bottom: 36px; left: 0; width: 100%; margin: 0; }
 .scrub3d.is-3d .scrub3d-parts { margin-top: 18px; }
+
+/* Part callouts drawn over the canvas by js/bearing3d.js. */
+.scrub3d-callout {
+  position: absolute; transform: translateY(-50%);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: #fff; white-space: nowrap;
+  padding-bottom: 6px; border-bottom: 1px solid #C30001;
+}
+
+/* Narrow screens run the same animation, but they cannot overlay the copy on
+   the bearing the way a landscape viewport can. The header takes the top of
+   the screen and the heading, paragraph and part list take the bottom third,
+   so a full-bleed canvas would put the bearing behind both, which is what a
+   phone was actually showing. The stage becomes a column instead and the
+   canvas takes whatever height is left between them, with no fixed numbers to
+   go stale. The callouts are children of the canvas, so they stay inside that
+   band rather than landing on the paragraph.
+
+   svh rather than vh: a mobile address bar shrinking the viewport must not
+   push the copy off the bottom of a pinned section. Browsers without svh keep
+   the vh value declared above. */
+@media (max-width: 820px) and (min-height: 560px) {
+  .scrub3d.is-3d .scrub3d-stage {
+    height: 100svh;
+    display: flex; flex-direction: column;
+  }
+  .scrub3d.is-3d .scrub3d-eyebrow {
+    position: static; padding-top: calc(var(--navh, 96px) + 14px);
+  }
+  .scrub3d.is-3d .scrub3d-canvas {
+    position: relative; inset: auto; flex: 1; min-height: 0;
+  }
+  .scrub3d.is-3d .scrub3d-copy { position: static; padding-bottom: 24px; }
+}
+
+@media (max-width: 820px) {
+  /* The four callouts on the bearing name these same parts, so while the scrub
+     is running the chips are duplicate text competing for a short viewport.
+     They stay for the static fallback, which has no callouts to name them. */
+  .scrub3d.is-3d .scrub3d-parts { display: none; }
+  .scrub3d-callout { font-size: 10px; letter-spacing: .08em; padding-bottom: 4px; }
+}
+
+/* A phone held sideways has no vertical room to stack anything, so it keeps
+   the full-bleed overlay the desktop uses. The status caption goes: it would
+   sit behind the header, which is most of a landscape phone's height. */
+@media (max-width: 820px) and (max-height: 559px) {
+  .scrub3d.is-3d .scrub3d-eyebrow { display: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .scrub3d.is-3d { height: auto; }

@@ -83,24 +83,36 @@
     <div data-scrub-canvas="1" class="scrub3d-canvas"></div>
 
     <div class="scrub3d-static" aria-hidden="true">
-      <svg viewBox="0 0 640 420" role="img" focusable="false">
+      <svg viewBox="0 0 640 417" role="img" focusable="false">
         <title>Deep groove ball bearing, exploded into four parts</title>
-        <g fill="none" stroke="#8FA8BC" stroke-width="14">
-          <ellipse cx="320" cy="120" rx="196" ry="62"></ellipse>
-          <ellipse cx="320" cy="300" rx="104" ry="33"></ellipse>
+        <defs>
+          <radialGradient id="bsl-ball" cx="34%" cy="30%" r="74%">
+            <stop offset="0" stop-color="#ffffff"/>
+            <stop offset=".55" stop-color="#cddced"/>
+            <stop offset="1" stop-color="#5d7387"/>
+          </radialGradient>
+        </defs>
+
+        <!-- assembly axis: the cue that these four parts stack into one unit -->
+        <line x1="320" y1="4" x2="320" y2="411"
+              stroke="#8FA8BC" stroke-opacity=".3" stroke-width="2" stroke-dasharray="5 11"/>
+
+        <g class="bx-outer">
+          <path d="M134.0,62.0A186.0,52.1 0 0 0 506.0,62.0L506.0,86.0A186.0,52.1 0 0 1 134.0,86.0ZM170.0,62.0A150.0,42.0 0 0 0 470.0,62.0L470.0,86.0A150.0,42.0 0 0 1 170.0,86.0Z" fill="#4f6a80" fill-rule="evenodd"/>
+          <path d="M134.0,62.0A186.0,52.1 0 1 0 506.0,62.0A186.0,52.1 0 1 0 134.0,62.0ZM170.0,62.0A150.0,42.0 0 1 0 470.0,62.0A150.0,42.0 0 1 0 170.0,62.0Z" fill="#8FA8BC" fill-rule="evenodd"/>
         </g>
-        <g fill="none" stroke="rgba(143,168,188,.55)" stroke-width="4">
-          <ellipse cx="320" cy="210" rx="150" ry="48"></ellipse>
+
+        <g class="bx-cage">
+          <path d="M176.0,256.0A144.0,40.3 0 0 0 464.0,256.0L464.0,270.0A144.0,40.3 0 0 1 176.0,270.0ZM202.0,256.0A118.0,33.0 0 0 0 438.0,256.0L438.0,270.0A118.0,33.0 0 0 1 202.0,270.0Z" fill="#41586b" fill-rule="evenodd"/>
+          <path d="M176.0,256.0A144.0,40.3 0 1 0 464.0,256.0A144.0,40.3 0 1 0 176.0,256.0ZM202.0,256.0A118.0,33.0 0 1 0 438.0,256.0A118.0,33.0 0 1 0 202.0,256.0Z" fill="#6d8497" fill-rule="evenodd"/>
+          <g fill="#33495c"><ellipse cx="320.0" cy="219.3" rx="15" ry="7"/><ellipse cx="412.6" cy="230.1" rx="15" ry="7"/><ellipse cx="227.4" cy="230.1" rx="15" ry="7"/><ellipse cx="451.0" cy="256.0" rx="15" ry="7"/><ellipse cx="189.0" cy="256.0" rx="15" ry="7"/><ellipse cx="412.6" cy="281.9" rx="15" ry="7"/><ellipse cx="227.4" cy="281.9" rx="15" ry="7"/><ellipse cx="320.0" cy="292.7" rx="15" ry="7"/></g>
         </g>
-        <g fill="#E8F4FB">
-          <ellipse cx="320" cy="162" rx="17" ry="17"></ellipse>
-          <ellipse cx="426" cy="186" rx="17" ry="17"></ellipse>
-          <ellipse cx="470" cy="210" rx="17" ry="17"></ellipse>
-          <ellipse cx="426" cy="234" rx="17" ry="17"></ellipse>
-          <ellipse cx="320" cy="258" rx="17" ry="17"></ellipse>
-          <ellipse cx="214" cy="234" rx="17" ry="17"></ellipse>
-          <ellipse cx="170" cy="210" rx="17" ry="17"></ellipse>
-          <ellipse cx="214" cy="186" rx="17" ry="17"></ellipse>
+
+        <g class="bx-balls" fill="url(#bsl-ball)"><circle cx="320.0" cy="165.3" r="19"/><circle cx="412.6" cy="176.1" r="19"/><circle cx="227.4" cy="176.1" r="19"/><circle cx="451.0" cy="202.0" r="19"/><circle cx="189.0" cy="202.0" r="19"/><circle cx="412.6" cy="227.9" r="19"/><circle cx="227.4" cy="227.9" r="19"/><circle cx="320.0" cy="238.7" r="19"/></g>
+
+        <g class="bx-inner">
+          <path d="M208.0,350.0A112.0,31.4 0 0 0 432.0,350.0L432.0,374.0A112.0,31.4 0 0 1 208.0,374.0ZM240.0,350.0A80.0,22.4 0 0 0 400.0,350.0L400.0,374.0A80.0,22.4 0 0 1 240.0,374.0Z" fill="#4f6a80" fill-rule="evenodd"/>
+          <path d="M208.0,350.0A112.0,31.4 0 1 0 432.0,350.0A112.0,31.4 0 1 0 208.0,350.0ZM240.0,350.0A80.0,22.4 0 1 0 400.0,350.0A80.0,22.4 0 1 0 240.0,350.0Z" fill="#8FA8BC" fill-rule="evenodd"/>
         </g>
       </svg>
     </div>

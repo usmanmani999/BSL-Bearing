@@ -322,6 +322,32 @@ img, svg { max-width: 100%; }
 .scrub3d-canvas { display: none; }
 .scrub3d-static { margin: 26px auto 0; padding: 0 32px; max-width: 620px; }
 .scrub3d-static svg { display: block; width: 100%; height: auto; }
+
+/* The static diagram is what phones and any WebGL-less desktop actually see,
+   so it plays the separation the pinned 3D scrub plays elsewhere: the four
+   parts start stacked together and move apart once the diagram scrolls into
+   view. The two races do the travelling and the ball set barely moves, which
+   is how a bearing really comes apart.
+
+   The SVG is authored in its final exploded position and js/site.js only adds
+   .is-exploding, so a visitor with no JavaScript, or one who prefers reduced
+   motion, still gets the correct diagram. It simply does not move. */
+.scrub3d-static svg > g { transform-box: view-box; }
+.scrub3d-static.is-exploding svg > g {
+  animation: bsl-explode 1s cubic-bezier(.16,1,.3,1) both;
+}
+.scrub3d-static.is-exploding .bx-outer { --bsl-from: 144px; }
+.scrub3d-static.is-exploding .bx-balls { --bsl-from: 4px;   animation-delay: .06s; }
+.scrub3d-static.is-exploding .bx-cage  { --bsl-from: -50px; animation-delay: .1s; }
+.scrub3d-static.is-exploding .bx-inner { --bsl-from: -144px; animation-delay: .14s; }
+@keyframes bsl-explode {
+  from { transform: translateY(var(--bsl-from)); opacity: .3; }
+  to   { transform: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrub3d-static.is-exploding svg > g { animation: none; }
+}
+
 .scrub3d-copy { margin-top: 34px; }
 .scrub3d-parts {
   list-style: none; margin: 24px 0 0; padding: 0;

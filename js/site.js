@@ -44,6 +44,23 @@ if (seriesHost || catalogueHosts.length) {
   }).catch(() => {});
 }
 
+/* Play the static diagram's separation once it scrolls into view. This is the
+   only motion the exploded-view section has on a phone, where the pinned 3D
+   scrub is deliberately off. Adding a class is the whole job: the SVG already
+   sits in its exploded position, so nothing here can leave the diagram in a
+   half-assembled or invisible state. */
+const diagram = document.querySelector('.scrub3d-static');
+if (diagram && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const dio = new IntersectionObserver((entries, obs) => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      diagram.classList.add('is-exploding');
+      obs.disconnect();
+    });
+  }, { threshold: 0.25 });
+  dio.observe(diagram);
+}
+
 /* The scroll-scrub exploded view is an enhancement, never a gate. The section
    renders as a static diagram until we have confirmed all of: a pointer-driven
    viewport, no reduced-motion preference, WebGL, and Three.js actually
